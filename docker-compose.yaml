@@ -1,0 +1,29 @@
+services:
+  # nginx
+  # nombramiento para el servicio: web
+  web:
+    image: nginx:latest
+    volumes:
+      # Mapea el archivo de configuración de Nginx desde tu sistema anfitrión al contenedor. Esto permite que Nginx use tu configuración personalizada.
+      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+      # Mapea el directorio app desde tu sistema anfitrión al contenedor en la ruta /var/www/html. Esto permite que Nginx sirva tus archivos PHP desde esa ubicación.
+      - ./app/public:/var/www/html
+    ports:
+      - "80:80" # 80 localhost a 80 container
+    # Indica que el servicio web depende del servicio app. Docker Compose iniciará el servicio app antes de iniciar web.
+    depends_on:
+      - app
+  # php
+  # nombramiento para el servicio: app
+  app:
+    build:
+      # Define el contexto de construcción para el servicio. Docker construirá la imagen del contenedor utilizando el directorio ./php como contexto.
+      context: ./php
+      # Indica que Docker debe usar el archivo Dockerfile en el directorio ./php para construir la imagen.
+      dockerfile: Dockerfile
+    volumes:
+      # Mapea el directorio app desde tu sistema anfitrión al contenedor en la ruta /var/www/html. Esto asegura que la aplicación PHP sea accesible desde el contenedor.
+      - ./app/public:/var/www/html
+    expose:
+      - "9000"
+    # mysql
